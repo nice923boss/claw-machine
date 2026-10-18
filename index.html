@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>3D 夾娃娃機</title>
+    <meta name="description" content="用瀏覽器就能玩的 3D 夾娃娃機：投幣、甩夾、半空收爪、勾吊牌，代幣全是免費虛擬代幣。" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧸</text></svg>" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+          "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js",
+          "zzfx": "https://cdn.jsdelivr.net/npm/zzfx@1.4.0/ZzFX.js",
+          "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.module.mjs"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="stage"></div>
+
+    <div id="hud">
+      <section id="status" class="panel" aria-label="狀態">
+        <div class="stat">
+          <span class="label">代幣</span><b id="wallet" class="seg">20</b>
+          <button id="btn-exchange" class="btn small">兌換代幣</button>
+        </div>
+        <div class="stat"><span class="label">可玩次數</span><b id="credits" class="seg">0</b></div>
+        <div class="stat"><span class="label">倒數</span><b id="timer" class="seg">--</b></div>
+      </section>
+
+      <section id="tools" aria-label="選單">
+        <button id="btn-mute" class="btn small">靜音</button>
+        <button id="btn-prizes" class="btn small">戰利品 <span id="prize-count">0</span></button>
+        <button id="btn-tips" class="btn small">玩法技巧</button>
+      </section>
+
+      <div id="msgs">
+        <div id="toast" role="status" aria-live="polite"></div>
+        <div id="hint" hidden></div>
+      </div>
+
+      <nav id="views" aria-label="快速視角">
+        <button id="view-front" class="btn" data-view="front"><kbd>1</kbd>正面</button>
+        <button id="view-left" class="btn" data-view="left"><kbd>2</kbd>左側</button>
+        <button id="view-right" class="btn" data-view="right"><kbd>3</kbd>右側</button>
+        <button id="view-top" class="btn" data-view="top"><kbd>4</kbd>俯視</button>
+      </nav>
+
+      <ul id="keys-help" class="panel" aria-label="鍵盤操作">
+        <li><kbd>C</kbd> 投幣</li>
+        <li><kbd>方向鍵</kbd>／<kbd>WASD</kbd> 移動爪子</li>
+        <li><kbd>空白鍵</kbd> 下爪，下降中再按一次半空收爪</li>
+        <li>拖曳 繞著機台走，滾輪 走近走遠</li>
+      </ul>
+
+      <div id="joystick" aria-label="方向搖桿"><div id="knob"></div></div>
+
+      <div id="actions">
+        <button id="btn-start" class="btn big">開始</button>
+        <button id="btn-drop" class="btn big primary">下爪</button>
+      </div>
+
+      <div id="win-pop" hidden>
+        <span id="win-rarity" class="badge"></span>
+        <strong id="win-name"></strong>
+      </div>
+
+      <pre id="debug" hidden></pre>
+      <footer id="credit">製作者：黃政文</footer>
+    </div>
+
+    <section id="sheet-prizes" class="sheet" role="dialog" aria-label="戰利品" hidden>
+      <div class="sheet-box">
+        <header>
+          <h2>戰利品</h2>
+          <button class="btn small" data-close>關閉</button>
+        </header>
+        <p class="note">紀錄存在這台裝置的瀏覽器裡，換裝置或清除瀏覽資料就會不見。</p>
+        <ul id="prize-list"></ul>
+      </div>
+    </section>
+
+    <section id="sheet-tips" class="sheet" role="dialog" aria-label="玩法技巧" hidden>
+      <div class="sheet-box">
+        <header>
+          <h2>玩法技巧</h2>
+          <button class="btn small" data-close>關閉</button>
+        </header>
+        <ul class="tips">
+          <li><b>投幣</b>點機台右前方亮綠燈的「投幣」口，一次 1 枚，可以一直投，次數會累加。代幣全是免費虛擬代幣，用完按「兌換代幣」就能補。</li>
+          <li><b>開局</b>有次數時按「開始」或直接推搖桿。每局 30 秒，時間到會自動下爪。</li>
+          <li><b>甩夾</b>爪子吊在繩子上，輕推搖桿就會大幅晃動。可以趁晃的時候下爪，把爪子甩到旁邊，或撞動玩偶。想停穩瞄準，就放開搖桿等它慢慢停下。</li>
+          <li><b>半空收爪</b>下爪途中再按一次「下爪」，爪子會在當下的高度立刻合起，適合夾高處的玩偶或勾吊牌。</li>
+          <li><b>勾吊牌</b>有些玩偶頭上掛著金色吊牌環，讓爪尖穿進環裡，就能把它吊起來。</li>
+          <li><b>推洞</b>靠近出貨口的玩偶，可以用爪子推、壓，或用回程的甩動把它撞進洞。</li>
+          <li><b>換角度</b>從正面看不準前後，就走到側面看。「俯視」是走到正面踮腳貼著玻璃往下看。</li>
+          <li><b>爪力</b>每一局的爪力都不一樣，跟真的機台一樣。抓偏或玩偶太大比較容易滑掉。</li>
+          <li><b>稀有度</b>普通、稀有、限定（金色閃亮）三種，越稀有越少見。</li>
+        </ul>
+        <table class="keys">
+          <thead>
+            <tr><th>動作</th><th>桌機</th><th>手機</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>投幣</td><td>點投幣口，或按 C</td><td>點投幣口</td></tr>
+            <tr><td>移動爪子</td><td>方向鍵／WASD</td><td>畫面上的方向搖桿</td></tr>
+            <tr><td>下爪</td><td>空白鍵</td><td>「下爪」按鈕</td></tr>
+            <tr><td>換角度</td><td>滑鼠拖曳、滾輪</td><td>單指拖曳、雙指縮放</td></tr>
+            <tr><td>快速視角</td><td>1～4</td><td>視角按鈕</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div id="boot">載入中…</div>
+    <noscript><div id="noscript">這個遊戲需要開啟 JavaScript 才能玩。</div></noscript>
+
+    <script>
+      // Shown when the game modules cannot load (offline, CDN blocked) or fail while starting.
+      (function () {
+        var lastErr = "";
+        function fail(reason) {
+          if (window.__clawReady || window.__clawFatal) return;
+          window.__clawFatal = true;
+          var boot = document.getElementById("boot");
+          if (!boot) return;
+          boot.className = "error";
+          boot.textContent =
+            "遊戲載入失敗：" + reason +
+            "遊戲的 3D 與物理函式庫從 cdn.jsdelivr.net 下載，請確認網路正常、沒有被擋，再重新整理頁面。" +
+            (lastErr ? "（錯誤訊息：" + lastErr + "）" : "");
+        }
+        addEventListener("error", function (e) {
+          if (!lastErr) lastErr = e.message || "";
+          fail("啟動時發生錯誤。");
+        });
+        window.__clawLoadFail = function () {
+          fail("程式檔案沒有下載完整。");
+        };
+        setTimeout(function () {
+          fail("等了 20 秒還沒啟動。");
+        }, 20000);
+      })();
+    </script>
+    <script type="module" src="js/main.js" onerror="__clawLoadFail()"></script>
+  </body>
+</html>

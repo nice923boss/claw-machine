@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>爪子抓取 Spike</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2027; color: #e9eaee;
+      font: 13px/1.5 system-ui, "Microsoft JhengHei", "PingFang TC", sans-serif; }
+    canvas { display: block; }
+    #panel { position: fixed; left: 8px; top: 8px; max-width: min(520px, calc(100vw - 16px));
+      max-height: calc(100vh - 16px); overflow: auto; padding: 8px 10px; border-radius: 6px;
+      background: rgba(0, 0, 0, 0.66); white-space: pre-wrap; font: 12px/1.55 ui-monospace, Consolas, monospace; }
+    #help { position: fixed; right: 8px; bottom: 8px; padding: 6px 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.5); }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+        "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="panel">載入中…</div>
+  <div id="help">R 開局，方向鍵／WASD 移動，空白鍵下爪；加 ?debug=1 自動測試</div>
+  <script type="module" src="./spike.js"></script>
+</body>
+</html>

@@ -4,6 +4,8 @@
 
 代幣全是免費的虛擬代幣，沒有任何金流、登入或後端。
 
+**線上試玩：<https://nice923boss.github.io/claw-machine/>**
+
 ## 玩法
 
 1. **投幣**：點機台右前方亮綠燈的「投幣」口（桌機也可以按 <kbd>C</kbd>）。一次投 1 枚，可以一直投，可玩次數會累加。錢包一開始有 20 枚，用完按「兌換代幣」免費補 10 枚。
@@ -138,3 +140,9 @@ GitHub Pages 會讓瀏覽器快取檔案約 10 分鐘。剛更新完，玩家可
 ## 已知限制
 
 沒有驗證到的部分（Safari、實體手機觸控、音效試聽等）與設計取捨，整理在 [GAPS.md](GAPS.md)。
+
+## 授權
+
+[MIT License](LICENSE)。歡迎 fork、修改、拿去教學或做成自己的版本，保留授權聲明即可。
+
+使用的第三方函式庫各自採用原本的授權：three.js（MIT）、cannon-es（MIT）、ZzFX（MIT）、canvas-confetti（ISC）。
